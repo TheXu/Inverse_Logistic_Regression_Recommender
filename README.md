@@ -1,0 +1,2 @@
+# Inverse_Logistic_Regression_Recommender
+Recommendation engine by backwards engineering logistic regression classification
