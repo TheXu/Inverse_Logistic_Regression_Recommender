@@ -8,7 +8,7 @@ Created on 2019
 import numpy as np
 import pandas as pd
 
-class inverse_logistic_regression_recommender:
+class InverseLogisticRegressionRecommender:
     """
     Predict or recommend a select feature value, so that it can be classified
     as a select class. Based on binary logistic regression coefficients, other
@@ -20,7 +20,7 @@ class inverse_logistic_regression_recommender:
 
     y : str
         Dependent or Target Variable with binary positive and negative
-        class
+        class within 'df'
 
     coefs : list
         List of floats corresponding to the logistic regression binary
@@ -97,10 +97,14 @@ class inverse_logistic_regression_recommender:
         prediction = (self.interim_logits[target_class] - np.dot(feature_values, coefs))/predict_column_coef
         return(prediction)
 
-
-    def predict_df(self):
+    def predict_df(self, original_class=True, rows='all', columns='all'):
         """
-        Predict all dataset feature values using inverse logistic
+        Approximate all or specified dataset feature values using inverse
+        logistic regression classification. Based on true target class labels
+        , and true feature values. Could be used to evaluate accuracy of
+        recommendations
+        OR
+        Predict all or specified dataset feature values using inverse logistic
         regression classification to achieve opposite target class labels,
         using true feature values.
 
@@ -108,64 +112,66 @@ class inverse_logistic_regression_recommender:
         ----------
         self
 
-        Returns
-        -------
-        approximation : pandas.dataframe
-            Prediction/Recommendation of every feature value, given original
-            other feature values, to achieve opposite-of-original class labels
-        """
-        # Create function that approximates feature values by the row
-        def predict_row(self, row):
-            # Iterate over all self.df column names
-            # If column iterated is target variable, then return 
-            # opposite to true target value
-            target = int(not int(row[self.y]))
-            col_predict = list(map(lambda col: target if col==self.y
-            # Else, run ilrc recommender to approximate features, based on
-            # Other features and opposite to true class labels
-                            else inverse_logistic_regression_recommender.\
-                                predict(self, col, target, row.loc[(row.index != col) & (row.index != self.y)].tolist()), self.df.columns.tolist()))
-            return(col_predict)
-        # Iterate function above over rows of dataset
-        approximation = pd.DataFrame(self.df.\
-            apply(lambda row: predict_row(self, row), axis=1).\
-            tolist())
-        approximation.columns = self.df.columns.tolist()
-        return(approximation)
+        original_class : bool, optional
+            if True:
+                'approximate' to make feature value recommendations
+                using the true label
+            if False:
+                'predict' to make feature value recommendations
+                using the opposite to true label
 
+        rows : str (default) or list, optional
+            Rows/Indices to include for approximation/prediction
 
-    def approximate_df(self):
-        """
-        Approximate all dataset feature values using inverse logistic
-        regression classification. Based on true target class labels, and
-        true feature values. Could be used to evaluate accuracy of
-        recommendations
-
-        Parameters
-        ----------
-        self
+        columns : str (default) or list, optional
+            Columns to approximate or predict
 
         Returns
         -------
         approximation : pandas.dataframe
-            Approximation/Recommendation of every feature value, given original
-            other feature values, to achieve original class labels
+            Prediction/Approximation/Recommendation of every feature value
+            , given original other feature values, to achieve specified
+            class labels
         """
+        ## Recommendation Strategy: Predicting or Approximating
+        # Predicting would be predicting feature values that would achieve
+        # opposite to original class labels
+        if original_class==False:
+            # Function for opposite of original class label
+            target = lambda row: int(not int(row[self.y]))
+        # Approximating would be predicting feature values that would achieve
+        # original class labels
+        elif original_class==True:
+            # Function for original class label
+            target = lambda row: int(row[self.y])
+        ## Rows
+        if rows=='all':
+            # Rows to include will be all of them
+            rows_to_include = self.df.index.tolist()
+        else:
+            rows_to_include = rows
+        ## Columns
+        if columns=='all':
+            # Columns to approximate will be all of them
+            col_to_approx = self.df.columns.tolist()
+        else:
+            # Columns to approximate will be only what is specified
+            col_to_approx = columns
         # Create function that approximates feature values by the row
         def predict_row(self, row):
-            # Iterate over all self.df column names
+            # Iterate over all col_to_approx column names
             # If column iterated is target variable, then return target value
             col_predict = list(map(lambda col: int(row[self.y]) if col==self.y
             # Else, run ilrc recommender to approximate features, based on
-            # Other features and true class labels
-                            else inverse_logistic_regression_recommender.\
-                                predict(self, col, int(row[self.y]), row.loc[(row.index != col) & (row.index != self.y)].tolist()), self.df.columns.tolist()))
+            # Other features and specified class labels
+                            else InverseLogisticRegressionRecommender.\
+                                predict(self, col, target(row),
+                                row.loc[(row.index != col) & (row.index != self.y)].tolist()),
+                                col_to_approx))
             return(col_predict)
-        # Iterate function above over rows of dataset
-        approximation = pd.DataFrame(self.df.\
+        # Iterate function above over specified or all rows of dataset
+        approximation = pd.DataFrame(self.df[self.df.index.isin(rows_to_include)].\
             apply(lambda row: predict_row(self, row), axis=1).\
             tolist())
-        approximation.columns = self.df.columns.tolist()
-        # Store dataset within class, to use for evaluation
-        self.approximation = approximation
+        approximation.columns = col_to_approx
         return(approximation)

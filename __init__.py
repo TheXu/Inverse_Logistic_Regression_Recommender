@@ -5,9 +5,9 @@ Created on 2019
 
 @author: Alex Xu <ayx2@case.edu>
 """
-from .predict_feature_values import inverse_logistic_regression_recommender
+from .predict_feature_values import InverseLogisticRegressionRecommender
 
 __all__ = [
-    'inverse_logistic_regression_recommender'
+    'InverseLogisticRegressionRecommender'
 ]
 
