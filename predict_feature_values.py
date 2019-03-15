@@ -97,7 +97,7 @@ class InverseLogisticRegressionRecommender:
         prediction = (self.interim_logits[target_class] - np.dot(feature_values, coefs))/predict_column_coef
         return(prediction)
 
-    def predict_df(self, original_class=True, rows='all', columns='all'):
+    def predict_df(self, original_target=True, rows='all', columns='all'):
         """
         Approximate all or specified dataset feature values using inverse
         logistic regression classification. Based on true target class labels
@@ -112,7 +112,7 @@ class InverseLogisticRegressionRecommender:
         ----------
         self
 
-        original_class : bool, optional
+        original_target : bool, optional
             if True:
                 'approximate' to make feature value recommendations
                 using the true label
@@ -136,12 +136,12 @@ class InverseLogisticRegressionRecommender:
         ## Recommendation Strategy: Predicting or Approximating
         # Predicting would be predicting feature values that would achieve
         # opposite to original class labels
-        if original_class==False:
+        if original_target==False:
             # Function for opposite of original class label
             target = lambda row: int(not int(row[self.y]))
         # Approximating would be predicting feature values that would achieve
         # original class labels
-        elif original_class==True:
+        elif original_target==True:
             # Function for original class label
             target = lambda row: int(row[self.y])
         ## Rows
