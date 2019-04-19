@@ -8,11 +8,22 @@ Created on 2019
 import numpy as np
 import pandas as pd
 
+class InverseLinearRegressionRecommender:
+    def __init__(self, df, y, coefs):
+        self.df = df
+        self.y = y
+        self.coefs = coefs
+
+
+    def predict(self, predict_column, feature_values):
+        
+
+
 class InverseLogisticRegressionRecommender:
     """
-    Predict or recommend a select feature value, so that it can be classified
-    as a select class. Based on binary logistic regression coefficients, other
-    feature values.
+    Predict/Estimate/Recommend a select feature value, so that it can be
+    classified as a select class, using a closed form solution.
+    Based on binary logistic regression coefficients, other feature values.
     
     Parameters
     ----------
@@ -58,6 +69,7 @@ class InverseLogisticRegressionRecommender:
         self.interim_logits = self.mean_feature_values.\
             apply(lambda row: np.dot(row, coefs), axis=1).tolist()
 
+
     def predict(self, predict_column, target_class, feature_values):
         """
         Predict minimum/maximum column value, given a row of other fixed
@@ -74,7 +86,10 @@ class InverseLogisticRegressionRecommender:
 
         feature_values : list
             List of numerics representing fixed feature values, which
-            'predict_column' and 'target_class' will predict on
+            'predict_column' and 'target_class' will predict on. Order is
+            off of self.df.column order without the 'predict_column'.
+            Check order using
+            [x for x in self.df.columns.tolist() if x != predict_column]
 
         Returns
         -------
@@ -96,6 +111,7 @@ class InverseLogisticRegressionRecommender:
         # specified class, feature values
         prediction = (self.interim_logits[target_class] - np.dot(feature_values, coefs))/predict_column_coef
         return(prediction)
+
 
     def predict_df(self, original_target=True, rows='all', columns='all'):
         """
@@ -175,3 +191,5 @@ class InverseLogisticRegressionRecommender:
             tolist())
         approximation.columns = col_to_approx
         return(approximation)
+
+

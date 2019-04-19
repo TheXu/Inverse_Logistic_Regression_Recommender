@@ -91,3 +91,5 @@ def validate(recommender_class):
     # Assign column metrics to attribute of recommender class
     setattr(recommender_class, 'all_metrics', all_metrics)
     print('\nAssigned all_metrics dataframe to the recommender class.')
+    print('Beware of difference of magnitudes and scales when \
+          using all elements in dataset')
