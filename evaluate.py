@@ -8,6 +8,7 @@ Created on 2019
 from math import sqrt
 import pandas as pd
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from IPython.display import display
 
 
 def _error_metrics_(column, y_true, y_pred):
@@ -80,6 +81,7 @@ def validate(recommender_class):
     # Assign column metrics to attribute of recommender class
     setattr(recommender_class, 'column_metrics', metrics_by_col)
     print('\nAssigned column_metrics dataframe to the recommender class.')
+    display(recommender_class.column_metrics)
     ##### Compute evaluation metrics for every value approximated value in the
     # dataset
     # Put original and approximation datasets into series
@@ -91,5 +93,5 @@ def validate(recommender_class):
     # Assign column metrics to attribute of recommender class
     setattr(recommender_class, 'all_metrics', all_metrics)
     print('\nAssigned all_metrics dataframe to the recommender class.')
-    print('Beware of difference of magnitudes and scales when \
-          using all elements in dataset')
+    print('Beware of difference of magnitudes and scales when using all elements in dataset')
+    display(recommender_class.all_metrics)

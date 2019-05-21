@@ -9,14 +9,22 @@ import numpy as np
 import pandas as pd
 
 class InverseLinearRegressionRecommender:
-    def __init__(self, df, y, coefs):
+    def __init__(self, df, y, coefs, intercept):
         self.df = df
         self.y = y
         self.coefs = coefs
+        self.intercept = intercept
 
 
-    def predict(self, predict_column, feature_values):
-        
+    def predict(self, predict_column, target_value, feature_values):
+        # Separate predict column coefficients from rest of the coefficients
+        predict_column_coef, other_coefs =\
+            _get_predict_column_coef_(self.df, self.y, self.coefs,
+                                      predict_column)
+        # Compute prediction of feature value given coefficients and desired
+        # target value
+        prediction = (target_value - self.intercept - np.dot(feature_values, self.coefs))/predict_column_coef
+        return(prediction)
 
 
 class InverseLogisticRegressionRecommender:
@@ -97,19 +105,13 @@ class InverseLogisticRegressionRecommender:
             Predicted column value to achieve desired class, when all other
             features are held constant
         """
-        # Create a copy of coefficients list
-        coefs = self.coefs.copy()
-        # Get index position of column to predict on by feature values
-        # self.df column names
-        predict_column_index = self.df.drop(self.y, axis=1).columns.\
-            tolist().index(predict_column)
-        # Extract predict column coefficient, and remove it from feature
-        # value coefficients
-        predict_column_coef = coefs[predict_column_index]
-        del coefs[predict_column_index]
+        # Separate predict column coefficients from rest of the coefficients
+        predict_column_coef, other_coefs =\
+            _get_predict_column_coef_(self.df, self.y, self.coefs,
+                                      predict_column)
         # Compute prediction of feature value given interim logits for
         # specified class, feature values
-        prediction = (self.interim_logits[target_class] - np.dot(feature_values, coefs))/predict_column_coef
+        prediction = (self.interim_logits[target_class] - np.dot(feature_values, other_coefs))/predict_column_coef
         return(prediction)
 
 
@@ -193,3 +195,17 @@ class InverseLogisticRegressionRecommender:
         return(approximation)
 
 
+def _get_predict_column_coef_(df, y, coefs, predict_column):
+    """
+    """
+    # Create a copy of coefficients list
+    coefs = coefs.copy()
+    # Get index position of column to predict on by feature values
+    # self.df column names
+    predict_column_index = df.drop(y, axis=1).columns.\
+        tolist().index(predict_column)
+    # Extract predict column coefficient, and remove it from feature
+    # value coefficients
+    predict_column_coef = coefs[predict_column_index]
+    del coefs[predict_column_index]
+    return(predict_column_coef, coefs)
